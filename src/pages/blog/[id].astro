@@ -20,7 +20,7 @@ const { Content, remarkPluginFrontmatter } = await render(post);
   description={post.data.description || post.data.title}
   title={`${post.data.title} - Ryo Nakayama`}
 >
-  <main class="mx-auto max-w-3xl w-full p-6 text-neutral-100">
+  <main class="mx-auto max-w-3xl w-full px-6 py-12 text-neutral-100 min-h-screen">
     <a
       class="text-sm text-gray-400 hover:text-white mb-4 inline-block"
       href="/blog"
@@ -57,3 +57,11 @@ const { Content, remarkPluginFrontmatter } = await render(post);
     </article>
   </main>
 </BasicLayout>
+
+<style>
+  body {
+    justify-content: flex-start !important;
+    height: auto !important;
+    min-height: 100vh;
+  }
+</style>

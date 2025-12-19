@@ -18,7 +18,7 @@ const allTags = [...new Set(posts.flatMap((post) => post.data.tags || []))];
 ---
 
 <BasicLayout title="Blog - Ryo Nakayama" description="Blog posts by Ryo Nakayama">
-  <main class="text-white m-auto p-6 max-w-3xl">
+  <main class="text-white m-auto px-6 py-12 max-w-3xl min-h-screen">
     <a href="/" class="text-sm text-gray-400 hover:text-white mb-4 inline-block">
       ← Back to Home
     </a>
@@ -70,3 +70,11 @@ const allTags = [...new Set(posts.flatMap((post) => post.data.tags || []))];
     )}
   </main>
 </BasicLayout>
+
+<style>
+  body {
+    justify-content: flex-start !important;
+    height: auto !important;
+    min-height: 100vh;
+  }
+</style>
