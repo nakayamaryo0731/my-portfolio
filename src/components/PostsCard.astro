@@ -1,9 +1,7 @@
 ---
 import Card from "./Card/index.astro";
-import Parser from "rss-parser";
+import { fetchRSSFeed } from "../lib/rss-fetch";
 import { getCollection } from "astro:content";
-
-const parser = new Parser();
 
 type PostItem = {
   title: string;
@@ -26,34 +24,26 @@ blogPosts.forEach((post) => {
 });
 
 // Zenn
-try {
-  const zennFeed = await parser.parseURL("https://zenn.dev/r0nr0n/feed");
-  zennFeed.items?.forEach((item) => {
-    posts.push({
-      title: item.title || "",
-      link: item.link || "",
-      pubDate: new Date(item.pubDate || ""),
-      source: "Zenn",
-    });
+const zennItems = await fetchRSSFeed("https://zenn.dev/r0nr0n/feed");
+zennItems.forEach((item) => {
+  posts.push({
+    title: item.title,
+    link: item.link,
+    pubDate: item.pubDate,
+    source: "Zenn",
   });
-} catch (e) {
-  // Zennの記事がない場合はスキップ
-}
+});
 
 // note
-try {
-  const noteFeed = await parser.parseURL("https://note.com/ron0731/rss");
-  noteFeed.items?.forEach((item) => {
-    posts.push({
-      title: item.title || "",
-      link: item.link || "",
-      pubDate: new Date(item.pubDate || ""),
-      source: "note",
-    });
+const noteItems = await fetchRSSFeed("https://note.com/ron0731/rss");
+noteItems.forEach((item) => {
+  posts.push({
+    title: item.title,
+    link: item.link,
+    pubDate: item.pubDate,
+    source: "note",
   });
-} catch (e) {
-  // noteの記事がない場合はスキップ
-}
+});
 
 // 日付でソート（新しい順）
 posts.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());

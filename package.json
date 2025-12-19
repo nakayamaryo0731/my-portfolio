@@ -30,7 +30,6 @@
     "mdast-util-to-string": "^4.0.0",
     "motion": "^12.23.25",
     "reading-time": "^1.5.0",
-    "rss-parser": "^3.13.0",
     "solid-js": "^1.9.10",
     "svelte": "^5.45.6"
   },
