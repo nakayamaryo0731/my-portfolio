@@ -1,18 +1,19 @@
 ---
-export const prerender = false;
+export const prerender = true;
 
 import { getCollection, render } from "astro:content";
 import BasicLayout from "../../layouts/BasicLayout.astro";
 import { formatDate } from "../../lib/helpers";
 
-const { id } = Astro.params;
-const posts = await getCollection("blog");
-const post = posts.find((p) => p.id === id);
-
-if (!post) {
-  return Astro.redirect("/404");
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: { id: post.id },
+    props: { post },
+  }));
 }
 
+const { post } = Astro.props;
 const { Content, remarkPluginFrontmatter } = await render(post);
 ---
 

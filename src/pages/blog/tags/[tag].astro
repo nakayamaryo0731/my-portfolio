@@ -1,14 +1,25 @@
 ---
-export const prerender = false;
+export const prerender = true;
 
 import { getCollection } from "astro:content";
 import BasicLayout from "../../../layouts/BasicLayout.astro";
 
-const { tag } = Astro.params;
+export async function getStaticPaths() {
+  const allPosts = await getCollection("blog", ({ data }) => !data.draft);
+  const allTags = [...new Set(allPosts.flatMap((post) => post.data.tags || []))];
 
-const posts = (await getCollection("blog", ({ data }) => !data.draft))
-  .filter((post) => post.data.tags?.includes(tag || ""))
-  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+  return allTags.map((tag) => {
+    const filteredPosts = allPosts
+      .filter((post) => post.data.tags?.includes(tag))
+      .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+    return {
+      params: { tag },
+      props: { posts: filteredPosts, tag },
+    };
+  });
+}
+
+const { posts, tag } = Astro.props;
 
 const formatDate = (date: Date) => {
   return date.toLocaleDateString("ja-JP", {

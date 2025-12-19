@@ -1,17 +1,18 @@
 ---
-export const prerender = false;
+export const prerender = true;
 
 import { getCollection, render } from "astro:content";
 import BasicLayout from "../../layouts/BasicLayout.astro";
 
-const { id } = Astro.params;
-const books = await getCollection("books");
-const book = books.find((b) => b.id === id);
-
-if (!book) {
-  return Astro.redirect("/404");
+export async function getStaticPaths() {
+  const books = await getCollection("books");
+  return books.map((book) => ({
+    params: { id: book.id },
+    props: { book },
+  }));
 }
 
+const { book } = Astro.props;
 const { Content } = await render(book);
 
 const stars = (rating: number) => "★".repeat(rating) + "☆".repeat(5 - rating);
