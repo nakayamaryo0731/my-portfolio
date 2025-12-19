@@ -1,0 +1,170 @@
+---
+import { getCollection } from "astro:content";
+import BasicLayout from "../layouts/BasicLayout.astro";
+import Parser from "rss-parser";
+
+const parser = new Parser();
+
+type PostItem = {
+  title: string;
+  link: string;
+  pubDate: Date;
+  source: "Zenn" | "note" | "Blog";
+  description?: string;
+};
+
+const posts: PostItem[] = [];
+
+// Internal blog posts
+const blogPosts = await getCollection("blog", ({ data }) => !data.draft);
+blogPosts.forEach((post) => {
+  posts.push({
+    title: post.data.title,
+    link: `/blog/${post.id}`,
+    pubDate: post.data.pubDate,
+    source: "Blog",
+    description: post.data.description,
+  });
+});
+
+// Zenn
+try {
+  const zennFeed = await parser.parseURL("https://zenn.dev/r0nr0n/feed");
+  zennFeed.items?.forEach((item) => {
+    posts.push({
+      title: item.title || "",
+      link: item.link || "",
+      pubDate: new Date(item.pubDate || ""),
+      source: "Zenn",
+      description: item.contentSnippet?.slice(0, 100),
+    });
+  });
+} catch (e) {
+  // skip
+}
+
+// note
+try {
+  const noteFeed = await parser.parseURL("https://note.com/ron0731/rss");
+  noteFeed.items?.forEach((item) => {
+    posts.push({
+      title: item.title || "",
+      link: item.link || "",
+      pubDate: new Date(item.pubDate || ""),
+      source: "note",
+      description: item.contentSnippet?.slice(0, 100),
+    });
+  });
+} catch (e) {
+  // skip
+}
+
+// Sort by date
+posts.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
+
+// Pagination
+const ITEMS_PER_PAGE = 10;
+const url = new URL(Astro.request.url);
+const currentPage = Number(url.searchParams.get("page")) || 1;
+const totalPages = Math.ceil(posts.length / ITEMS_PER_PAGE);
+const paginatedPosts = posts.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+const formatDate = (date: Date) => {
+  return date.toLocaleDateString("ja-JP", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const sourceStyles = {
+  "Blog": "bg-primary-500 text-white",
+  "Zenn": "bg-blue-500 text-white",
+  "note": "bg-green-600 text-white",
+};
+---
+
+<BasicLayout title="All Posts - Ryo Nakayama" description="All posts from Blog, Zenn, and note">
+  <main class="text-white m-auto px-6 py-12 max-w-3xl min-h-screen">
+    <a href="/" class="text-sm text-gray-400 hover:text-white mb-4 inline-block">
+      ← Back to Home
+    </a>
+
+    <h1 class="text-3xl font-bold mt-6 mb-4">All Posts</h1>
+
+    <div class="flex gap-4 mb-8 text-sm">
+      <span class="text-gray-400">Sources:</span>
+      <a href="/blog" class="text-primary-400 hover:underline">Blog ({posts.filter(p => p.source === "Blog").length})</a>
+      <a href="https://zenn.dev/r0nr0n" target="_blank" class="text-blue-400 hover:underline">Zenn ({posts.filter(p => p.source === "Zenn").length})</a>
+      <a href="https://note.com/ron0731" target="_blank" class="text-green-400 hover:underline">note ({posts.filter(p => p.source === "note").length})</a>
+    </div>
+
+    <ul class="space-y-4">
+      {paginatedPosts.map((post) => (
+        <li class="border-b border-neutral-700 pb-4">
+          <a
+            href={post.link}
+            target={post.source === "Blog" ? "_self" : "_blank"}
+            class="group block"
+          >
+            <div class="flex items-center gap-2 mb-1">
+              <span class={`text-xs px-1.5 py-0.5 rounded ${sourceStyles[post.source]}`}>
+                {post.source}
+              </span>
+              <h2 class="text-lg font-medium group-hover:text-primary-400 transition-colors">
+                {post.title}
+              </h2>
+            </div>
+            {post.description && (
+              <p class="text-gray-400 text-sm line-clamp-2">{post.description}</p>
+            )}
+            <time class="text-xs text-gray-500 mt-1 block">{formatDate(post.pubDate)}</time>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    {posts.length === 0 && (
+      <p class="text-gray-500">No posts yet.</p>
+    )}
+
+    {/* Pagination */}
+    {totalPages > 1 && (
+      <nav class="flex justify-center items-center gap-4 mt-12">
+        {currentPage > 1 ? (
+          <a
+            href={`/posts?page=${currentPage - 1}`}
+            class="px-4 py-2 bg-neutral-800 rounded hover:bg-neutral-700 transition-colors"
+          >
+            ← Prev
+          </a>
+        ) : (
+          <span class="px-4 py-2 bg-neutral-800 rounded opacity-50 cursor-not-allowed">← Prev</span>
+        )}
+
+        <span class="text-gray-400">
+          {currentPage} / {totalPages}
+        </span>
+
+        {currentPage < totalPages ? (
+          <a
+            href={`/posts?page=${currentPage + 1}`}
+            class="px-4 py-2 bg-neutral-800 rounded hover:bg-neutral-700 transition-colors"
+          >
+            Next →
+          </a>
+        ) : (
+          <span class="px-4 py-2 bg-neutral-800 rounded opacity-50 cursor-not-allowed">Next →</span>
+        )}
+      </nav>
+    )}
+  </main>
+</BasicLayout>
+
+<style>
+  body {
+    justify-content: flex-start !important;
+    height: auto !important;
+    min-height: 100vh;
+  }
+</style>

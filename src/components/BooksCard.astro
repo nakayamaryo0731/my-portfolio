@@ -21,5 +21,8 @@ const books = (await getCollection("books")).sort((a, b) => {
         </li>
       ))}
     </ul>
+    <a href="/books" class="text-xs text-primary-400 hover:underline mt-2">
+      All Books ({books.length}) →
+    </a>
   </div>
 </Card>
