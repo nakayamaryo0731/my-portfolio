@@ -1,0 +1,43 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+const { id } = Astro.params;
+const books = await getCollection("books");
+const book = books.find((b) => b.id === id);
+
+if (!book) {
+  return Astro.redirect("/404");
+}
+
+const { Content } = await render(book);
+
+const stars = (rating: number) => "★".repeat(rating) + "☆".repeat(5 - rating);
+---
+
+<Layout title={`${book.data.title} - Books`} description={`${book.data.title} by ${book.data.author}`}>
+  <main class="text-white m-auto p-6 max-w-3xl">
+    <a href="/" class="text-sm text-gray-400 hover:text-white mb-4 inline-block">
+      ← Back to Home
+    </a>
+
+    <article class="mt-6">
+      <header class="mb-8">
+        <h1 class="text-3xl font-bold mb-2">{book.data.title}</h1>
+        <p class="text-gray-400 text-lg">{book.data.author}</p>
+        {book.data.rating && (
+          <p class="text-yellow-400 mt-2">{stars(book.data.rating)}</p>
+        )}
+        {book.data.finished && (
+          <p class="text-gray-500 text-sm mt-1">
+            Finished: {book.data.finished.toLocaleDateString("ja-JP")}
+          </p>
+        )}
+      </header>
+
+      <div class="prose prose-invert max-w-none">
+        <Content />
+      </div>
+    </article>
+  </main>
+</Layout>

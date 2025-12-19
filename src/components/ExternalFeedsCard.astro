@@ -1,0 +1,91 @@
+---
+import Card from "./Card/index.astro";
+import Parser from "rss-parser";
+
+const parser = new Parser();
+
+type FeedItem = {
+  title: string;
+  link: string;
+  pubDate: string;
+  source: "zenn" | "note";
+};
+
+const feeds: FeedItem[] = [];
+
+// Zenn
+try {
+  const zennFeed = await parser.parseURL("https://zenn.dev/r0nr0n/feed");
+  zennFeed.items?.forEach((item) => {
+    feeds.push({
+      title: item.title || "",
+      link: item.link || "",
+      pubDate: item.pubDate || "",
+      source: "zenn",
+    });
+  });
+} catch (e) {
+  // Zennの記事がない場合はスキップ
+}
+
+// note
+try {
+  const noteFeed = await parser.parseURL("https://note.com/ron0731/rss");
+  noteFeed.items?.forEach((item) => {
+    feeds.push({
+      title: item.title || "",
+      link: item.link || "",
+      pubDate: item.pubDate || "",
+      source: "note",
+    });
+  });
+} catch (e) {
+  // noteの記事がない場合はスキップ
+}
+
+// 日付でソート（新しい順）
+feeds.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+
+const formatDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("ja-JP", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+---
+
+<Card colSpan="md:col-span-2" rowSpan="md:row-span-2" title="External Posts">
+  <div class="flex flex-col gap-2">
+    {feeds.length > 0 ? (
+      feeds.slice(0, 5).map((item) => (
+        <a
+          href={item.link}
+          target="_blank"
+          class="flex justify-between items-center border-b border-dashed border-neutral-700 pb-1 hover:text-neutral-400 transition-colors"
+        >
+          <div class="flex items-center gap-2">
+            <span class="text-xs px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400">
+              {item.source}
+            </span>
+            <span class="text-sm">{item.title}</span>
+          </div>
+          <time class="text-xs text-gray-500 whitespace-nowrap ml-2">
+            {formatDate(item.pubDate)}
+          </time>
+        </a>
+      ))
+    ) : (
+      <p class="text-sm text-gray-500">No posts yet</p>
+    )}
+  </div>
+  <div class="flex gap-4 mt-4 text-xs">
+    <a href="https://zenn.dev/r0nr0n" target="_blank" class="text-blue-400 hover:underline">
+      Zenn →
+    </a>
+    <a href="https://note.com/ron0731" target="_blank" class="text-green-400 hover:underline">
+      note →
+    </a>
+  </div>
+</Card>
