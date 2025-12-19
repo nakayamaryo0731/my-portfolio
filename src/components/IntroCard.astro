@@ -13,9 +13,9 @@ import { Image } from "astro:assets";
       <div class="flex flex-col h-full">
         <h6 class="text-sm font-light m-0 text-gray-500">welcome</h6>
         <p class="m-0 font-light text-xl">
-          Hi, I'm <b class="font-bold">Gianmarco Cavallo</b>, a software
-          developer with strong focus on the user experience, animations and
-          micro interactions
+          Hi, I'm <b class="font-bold">Ryo Nakayama</b>, a backend/infrastructure
+          engineer with 7 years of experience in manufacturing × IT. TypeScript,
+          Python, Rust. Studying CS at University of London.
         </p>
       </div>
       <div class="flex gap-4 flex-wrap">
@@ -31,34 +31,20 @@ import { Image } from "astro:assets";
             <span class="sr-only">Linkedin Profile</span>
           </Button>
         </a>
-        <a aria-label="dribble profile" href={LINKS.dribble} target="_blank">
-          <Button aria-label="dribble profile">
-            <Icon class="h-6" name="ri:dribbble-fill" />
-            <span class="sr-only">Dribble Profile</span>
+        <a aria-label="x profile" href={LINKS.x} target="_blank">
+          <Button aria-label="x profile">
+            <Icon class="h-6" name="ri:twitter-x-fill" />
+            <span class="sr-only">X Profile</span>
           </Button>
         </a>
-        <Tooltip client:visible>
-          <Button aria-label="easter egg btn">
-            <Icon class="h-6" name="ri:emotion-laugh-line" />
-            <span class="sr-only">Easter egg button</span>
-          </Button>
-        </Tooltip>
-        <a href="https://ko-fi.com/M4M71O34X" target="_blank"
-          ><img
-            height="36"
-            style="border:0px;height:36px;"
-            src="https://storage.ko-fi.com/cdn/kofi6.png?v=6"
-            alt="Buy Me a Coffee at ko-fi.com"
-          /></a
-        >
       </div>
     </div>
     <Image
-      alt="memoji of gianmarco"
-      class="w-auto max-h-[300px] select-none absolute right-[-110px] bottom-[-20px] z-[-1] opacity-50 md:opacity-100 md:relative md:right-auto md:bottom-auto md:z-auto pointer-events-none"
-      height="300"
-      src="/me.webp"
-      width="300"
+      alt="profile image of Ryo"
+      class="w-auto max-h-[200px] select-none absolute right-[-110px] bottom-[-20px] z-[-1] opacity-50 md:opacity-100 md:relative md:right-auto md:bottom-auto md:z-auto pointer-events-none"
+      height="200"
+      src="/me.jpg"
+      width="200"
     />
   </div>
 </Card>
