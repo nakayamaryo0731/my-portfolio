@@ -30,7 +30,14 @@ export default defineConfig({
     remarkPlugins: [remarkReadingTime],
   },
   output: "server",
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    platformProxy: {
+      enabled: true,
+    },
+    sessions: {
+      enabled: false,
+    },
+  }),
   vite: {
     assetsInclude: "**/*.riv",
   },
