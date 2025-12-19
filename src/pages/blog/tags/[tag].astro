@@ -1,0 +1,50 @@
+---
+import { getCollection } from "astro:content";
+import BasicLayout from "../../../layouts/BasicLayout.astro";
+
+const { tag } = Astro.params;
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .filter((post) => post.data.tags?.includes(tag || ""))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const formatDate = (date: Date) => {
+  return date.toLocaleDateString("ja-JP", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+---
+
+<BasicLayout title={`#${tag} - Blog`} description={`Posts tagged with #${tag}`}>
+  <main class="text-white m-auto p-6 max-w-3xl">
+    <a href="/blog" class="text-sm text-gray-400 hover:text-white mb-4 inline-block">
+      ← Back to Blog
+    </a>
+
+    <h1 class="text-3xl font-bold mt-6 mb-8">
+      <span class="text-primary-400">#{tag}</span>
+    </h1>
+
+    <ul class="space-y-4">
+      {posts.map((post) => (
+        <li class="border-b border-neutral-700 pb-4">
+          <a href={`/blog/${post.id}`} class="group">
+            <h2 class="text-xl font-medium group-hover:text-primary-400 transition-colors">
+              {post.data.title}
+            </h2>
+            {post.data.description && (
+              <p class="text-gray-400 text-sm mt-1 line-clamp-2">{post.data.description}</p>
+            )}
+            <time class="text-xs text-gray-500 mt-2 block">{formatDate(post.data.pubDate)}</time>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    {posts.length === 0 && (
+      <p class="text-gray-500">No posts with this tag.</p>
+    )}
+  </main>
+</BasicLayout>

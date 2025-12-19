@@ -3,6 +3,7 @@ title: "University of Londonの英語要件を突破してから入学するま�
 description: "申請から合格、入学までの流れをまとめ"
 pubDate: 2025-04-13
 category: "University of London"
+tags: ["UoL", "英語"]
 draft: false
 ---
 

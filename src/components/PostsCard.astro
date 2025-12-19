@@ -1,27 +1,39 @@
 ---
 import Card from "./Card/index.astro";
 import Parser from "rss-parser";
+import { getCollection } from "astro:content";
 
 const parser = new Parser();
 
-type FeedItem = {
+type PostItem = {
   title: string;
   link: string;
-  pubDate: string;
-  source: "zenn" | "note";
+  pubDate: Date;
+  source: "Zenn" | "note" | "Blog";
 };
 
-const feeds: FeedItem[] = [];
+const posts: PostItem[] = [];
+
+// Internal blog posts
+const blogPosts = await getCollection("blog", ({ data }) => !data.draft);
+blogPosts.forEach((post) => {
+  posts.push({
+    title: post.data.title,
+    link: `/blog/${post.id}`,
+    pubDate: post.data.pubDate,
+    source: "Blog",
+  });
+});
 
 // Zenn
 try {
   const zennFeed = await parser.parseURL("https://zenn.dev/r0nr0n/feed");
   zennFeed.items?.forEach((item) => {
-    feeds.push({
+    posts.push({
       title: item.title || "",
       link: item.link || "",
-      pubDate: item.pubDate || "",
-      source: "zenn",
+      pubDate: new Date(item.pubDate || ""),
+      source: "Zenn",
     });
   });
 } catch (e) {
@@ -32,10 +44,10 @@ try {
 try {
   const noteFeed = await parser.parseURL("https://note.com/ron0731/rss");
   noteFeed.items?.forEach((item) => {
-    feeds.push({
+    posts.push({
       title: item.title || "",
       link: item.link || "",
-      pubDate: item.pubDate || "",
+      pubDate: new Date(item.pubDate || ""),
       source: "note",
     });
   });
@@ -44,32 +56,37 @@ try {
 }
 
 // 日付でソート（新しい順）
-feeds.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+posts.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
 
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
+const formatDate = (date: Date) => {
   return date.toLocaleDateString("ja-JP", {
     year: "numeric",
     month: "short",
     day: "numeric",
   });
 };
+
+const sourceStyles = {
+  "Blog": "bg-primary-500 text-white",
+  "Zenn": "bg-blue-500 text-white",
+  "note": "bg-green-600 text-white",
+};
 ---
 
-<Card colSpan="md:col-span-2" rowSpan="md:row-span-2" title="External Posts">
+<Card colSpan="md:col-span-2" rowSpan="md:row-span-2" title="Posts">
   <div class="flex flex-col gap-2">
-    {feeds.length > 0 ? (
-      feeds.slice(0, 5).map((item) => (
+    {posts.length > 0 ? (
+      posts.slice(0, 8).map((item) => (
         <a
           href={item.link}
-          target="_blank"
+          target={item.source === "Blog" ? "_self" : "_blank"}
           class="flex justify-between items-center border-b border-dashed border-neutral-700 pb-1 hover:text-neutral-400 transition-colors"
         >
           <div class="flex items-center gap-2">
-            <span class="text-xs px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400">
+            <span class={`text-xs px-1.5 py-0.5 rounded ${sourceStyles[item.source]}`}>
               {item.source}
             </span>
-            <span class="text-sm">{item.title}</span>
+            <span class="text-sm line-clamp-1">{item.title}</span>
           </div>
           <time class="text-xs text-gray-500 whitespace-nowrap ml-2">
             {formatDate(item.pubDate)}
@@ -81,6 +98,9 @@ const formatDate = (dateStr: string) => {
     )}
   </div>
   <div class="flex gap-4 mt-4 text-xs">
+    <a href="/blog" class="text-primary-400 hover:underline">
+      Blog →
+    </a>
     <a href="https://zenn.dev/r0nr0n" target="_blank" class="text-blue-400 hover:underline">
       Zenn →
     </a>

@@ -1,43 +1,72 @@
 ---
 import { getCollection } from "astro:content";
-import Layout from "../../layouts/Layout.astro";
-import PostRow from "../../components/Blog/PostRow.astro";
+import BasicLayout from "../../layouts/BasicLayout.astro";
 
-const posts = (await getCollection("blog"))?.sort(
-  (blogEntryA, blogEntryB) =>
-    (blogEntryB.data.pubDate || new Date()).getTime() -
-    (blogEntryA.data.pubDate || new Date()).getTime()
-);
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const formatDate = (date: Date) => {
+  return date.toLocaleDateString("ja-JP", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+// Get unique tags
+const allTags = [...new Set(posts.flatMap((post) => post.data.tags || []))];
 ---
 
-<script>
-  import { animate, type AnimationSequence } from "motion";
-  import { loaderAnimation } from "../../lib/constants";
+<BasicLayout title="Blog - Ryo Nakayama" description="Blog posts by Ryo Nakayama">
+  <main class="text-white m-auto p-6 max-w-3xl">
+    <a href="/" class="text-sm text-gray-400 hover:text-white mb-4 inline-block">
+      ← Back to Home
+    </a>
 
-  const sequence = [loaderAnimation];
+    <h1 class="text-3xl font-bold mt-6 mb-8">Blog</h1>
 
-  animate(sequence as AnimationSequence);
-</script>
+    {allTags.length > 0 && (
+      <div class="mb-8">
+        <div class="flex flex-wrap gap-2">
+          {allTags.map((tag) => (
+            <a
+              href={`/blog/tags/${tag}`}
+              class="text-xs px-2 py-1 rounded bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition-colors"
+            >
+              #{tag}
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
 
-<Layout
-  description="Software developer with strong focus on the user experience animations and micro interactions"   title="Gianmarco Cavallo - Blog"
->
-  <main
-    class="w-screen h-screen flex flex-col justify-start items-start max-w-3xl mx-auto p-8"
-  >
-    <a
-      class="text-white bg-neutral-900 hover:bg-neutral-800 px-4 py-2 mb-8 border-1 border-solid border-neutral-600 rounded-lg"       href="/"
-      >Back</a
-    >
-    <h1 class="text-4xl font-bold mb-4 text-neutral-100">Posts</h1>
-    <ul class="w-full">
-      {
-        posts?.map((post) => (
-          <PostRow
-            date={post.data.pubDate || new Date()}             id={post.id}             title={post.data.title || "No title"}
-          />
-        ))
-      }
+    <ul class="space-y-4">
+      {posts.map((post) => (
+        <li class="border-b border-neutral-700 pb-4">
+          <a href={`/blog/${post.id}`} class="group">
+            <h2 class="text-xl font-medium group-hover:text-primary-400 transition-colors">
+              {post.data.title}
+            </h2>
+            {post.data.description && (
+              <p class="text-gray-400 text-sm mt-1 line-clamp-2">{post.data.description}</p>
+            )}
+            <div class="flex items-center gap-3 mt-2">
+              <time class="text-xs text-gray-500">{formatDate(post.data.pubDate)}</time>
+              {post.data.tags && post.data.tags.length > 0 && (
+                <div class="flex gap-1">
+                  {post.data.tags.map((tag) => (
+                    <span class="text-xs text-primary-400">#{tag}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </a>
+        </li>
+      ))}
     </ul>
+
+    {posts.length === 0 && (
+      <p class="text-gray-500">No posts yet.</p>
+    )}
   </main>
-</Layout>
+</BasicLayout>

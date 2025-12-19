@@ -1,130 +1,57 @@
 ---
-import { getEntry, render } from "astro:content";
-import { getCollection } from "astro:content";
-import LayoutBlogPost from "../../layouts/LayoutBlogPost.astro";
-
-export const prerender = true;
-
-export async function getStaticPaths() {
-  return (await getCollection("blog")).map(({ id }) => ({
-    params: { id: id as string },
-  }));
-}
+import { getCollection, render } from "astro:content";
+import BasicLayout from "../../layouts/BasicLayout.astro";
+import { formatDate } from "../../lib/helpers";
 
 const { id } = Astro.params;
+const posts = await getCollection("blog");
+const post = posts.find((p) => p.id === id);
 
-if (!id) {
-  throw new Error("id is missing");
-}
-
-const entry = await getEntry("blog", id);
-
-if (!entry) {
+if (!post) {
   return Astro.redirect("/404");
 }
 
-const { Content, remarkPluginFrontmatter } = await render(entry);
+const { Content, remarkPluginFrontmatter } = await render(post);
 ---
 
-<LayoutBlogPost
-  description={entry.data.description!}   minutesRead={remarkPluginFrontmatter.minutesRead}   pubDate={entry.data.pubDate!}   title={`${entry.data.title} | Gianmarco Cavallo`}   url={`blog/${entry.id}`}
+<BasicLayout
+  description={post.data.description || post.data.title}
+  title={`${post.data.title} - Ryo Nakayama`}
 >
-  <Content />
-</LayoutBlogPost>
+  <main class="mx-auto max-w-3xl w-full p-6 text-neutral-100">
+    <a
+      class="text-sm text-gray-400 hover:text-white mb-4 inline-block"
+      href="/blog"
+    >
+      ← Back to Blog
+    </a>
 
-<style is:global>
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    margin-top: 20px;
-    margin-bottom: 10px;
-    font-weight: bold;
-  }
+    <article class="mt-6">
+      <header class="mb-8">
+        <h1 class="text-3xl font-bold mb-4">{post.data.title}</h1>
+        <div class="flex items-center gap-4 text-sm text-gray-500">
+          <time>{formatDate(post.data.pubDate)}</time>
+          {remarkPluginFrontmatter?.minutesRead && (
+            <span>{remarkPluginFrontmatter.minutesRead}</span>
+          )}
+        </div>
+        {post.data.tags && post.data.tags.length > 0 && (
+          <div class="flex gap-2 mt-3">
+            {post.data.tags.map((tag) => (
+              <a
+                href={`/blog/tags/${tag}`}
+                class="text-xs px-2 py-1 rounded bg-neutral-800 text-primary-400 hover:bg-neutral-700"
+              >
+                #{tag}
+              </a>
+            ))}
+          </div>
+        )}
+      </header>
 
-  h1 {
-    font-size: 32px;
-  }
-
-  h2 {
-    font-size: 28px;
-  }
-
-  h3 {
-    font-size: 24px;
-  }
-
-  h4 {
-    font-size: 20px;
-  }
-
-  h5 {
-    font-size: 18px;
-  }
-
-  h6 {
-    font-size: 16px;
-  }
-
-  p {
-    margin: 0 0 10px 0;
-  }
-
-  a {
-    color: #1a0dab;
-    text-decoration: none;
-  }
-
-  a:hover {
-    text-decoration: underline;
-  }
-
-  ul,
-  ol {
-    margin-left: 20px;
-    margin-bottom: 10px;
-  }
-
-  blockquote {
-    margin: 20px 0;
-    padding-left: 15px;
-    border-left: 5px solid #ccc;
-  }
-
-  pre,
-  code {
-    font-family: "Courier New", monospace;
-    background-color: #f4f4f4;
-    border-radius: 5px;
-  }
-
-  pre {
-    padding: 10px;
-    overflow-x: auto;
-  }
-
-  code {
-    padding: 2px 4px;
-    font-size: 90%;
-    color: #d63384;
-  }
-
-  img {
-    max-width: 100%;
-    height: auto;
-  }
-
-  table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-
-  th,
-  td {
-    text-align: left;
-    padding: 8px;
-    border-bottom: 1px solid #ddd;
-  }
-</style>
+      <div class="prose prose-invert max-w-none">
+        <Content />
+      </div>
+    </article>
+  </main>
+</BasicLayout>

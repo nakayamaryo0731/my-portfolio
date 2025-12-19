@@ -3,6 +3,7 @@ title: "University of Londonに合格するために準備したこと <英語�
 description: "プログリッドでの具体的な学習内容とDuolingoスコアの推移"
 pubDate: 2025-04-04
 category: "University of London"
+tags: ["UoL", "英語"]
 draft: false
 ---
 

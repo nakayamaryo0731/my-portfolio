@@ -3,6 +3,7 @@ title: "アラサーのソフトウェアエンジニアがUniversity of London�
 description: "University of Londonに入学するまでの経緯と準備"
 pubDate: 2025-02-09
 category: "University of London"
+tags: ["UoL", "CS", "キャリア"]
 draft: false
 ---
 
