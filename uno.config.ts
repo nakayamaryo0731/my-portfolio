@@ -1,5 +1,5 @@
 // uno.config.ts
-import { defineConfig, presetWind3, presetWebFonts } from "unocss";
+import { defineConfig, presetWind3, presetWebFonts, presetTypography } from "unocss";
 
 export default defineConfig({
   content: {
@@ -64,6 +64,15 @@ export default defineConfig({
   },
   presets: [
     presetWind3(),
+    presetTypography({
+      cssExtend: {
+        'h2': { color: '#fff', 'margin-top': '1.5em', 'margin-bottom': '0.5em' },
+        'p': { color: '#d4d4d4' },
+        'li': { color: '#d4d4d4' },
+        'strong': { color: '#fff' },
+        'blockquote': { color: '#a3a3a3', 'border-left-color': '#525252' },
+      },
+    }),
     presetWebFonts({
       provider: "fontshare",
       fonts: {
