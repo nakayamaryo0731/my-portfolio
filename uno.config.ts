@@ -2,10 +2,6 @@
 import { defineConfig, presetWind3, presetWebFonts, presetTypography } from "unocss";
 
 export default defineConfig({
-  safelist: [
-    // PostsCard で動的に使用されるクラス
-    'bg-primary-500', 'bg-blue-500', 'bg-green-600', 'text-white',
-  ],
   content: {
     filesystem: [
       // Narrow scope to specific directories
