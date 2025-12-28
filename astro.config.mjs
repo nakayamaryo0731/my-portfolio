@@ -34,6 +34,9 @@ export default defineConfig({
     platformProxy: {
       enabled: true,
     },
+    sessions: {
+      enabled: false,
+    },
   }),
   vite: {
     assetsInclude: "**/*.riv",
