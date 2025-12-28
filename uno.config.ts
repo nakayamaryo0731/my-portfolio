@@ -2,6 +2,14 @@
 import { defineConfig, presetWind3, presetWebFonts, presetTypography } from "unocss";
 
 export default defineConfig({
+  safelist: [
+    'flex', 'justify-between', 'items-center', 'gap-2',
+    'border-b', 'border-dashed', 'border-neutral-700', 'pb-1',
+    'hover:text-neutral-400', 'transition-colors',
+    'text-xs', 'text-sm', 'text-gray-500', 'px-1.5', 'py-0.5', 'rounded',
+    'line-clamp-1', 'whitespace-nowrap', 'ml-2',
+    'bg-primary-500', 'bg-blue-500', 'bg-green-600', 'text-white',
+  ],
   content: {
     filesystem: [
       // Narrow scope to specific directories
