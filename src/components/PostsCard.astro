@@ -1,91 +1,10 @@
 ---
 import Card from "./Card/index.astro";
-import { fetchRSSFeed } from "../lib/rss-fetch";
-import { getCollection } from "astro:content";
-
-type PostItem = {
-  title: string;
-  link: string;
-  pubDate: Date;
-  source: "Zenn" | "note" | "Blog";
-};
-
-const posts: PostItem[] = [];
-
-// Internal blog posts
-const blogPosts = await getCollection("blog", ({ data }) => !data.draft);
-blogPosts.forEach((post) => {
-  posts.push({
-    title: post.data.title,
-    link: `/blog/${post.id}`,
-    pubDate: post.data.pubDate,
-    source: "Blog",
-  });
-});
-
-// Zenn
-const zennItems = await fetchRSSFeed("https://zenn.dev/r0nr0n/feed");
-zennItems.forEach((item) => {
-  posts.push({
-    title: item.title,
-    link: item.link,
-    pubDate: item.pubDate,
-    source: "Zenn",
-  });
-});
-
-// note
-const noteItems = await fetchRSSFeed("https://note.com/ron0731/rss");
-noteItems.forEach((item) => {
-  posts.push({
-    title: item.title,
-    link: item.link,
-    pubDate: item.pubDate,
-    source: "note",
-  });
-});
-
-// 日付でソート（新しい順）
-posts.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
-
-const formatDate = (date: Date) => {
-  return date.toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
-const sourceStyles = {
-  "Blog": "bg-primary-500 text-white",
-  "Zenn": "bg-blue-500 text-white",
-  "note": "bg-green-600 text-white",
-};
 ---
 
 <Card colSpan="md:col-span-2" rowSpan="md:row-span-3" title="Posts">
-  <div class="flex flex-col gap-2">
-    {posts.length > 0 ? (
-      posts.slice(0, 6).map((item) => (
-        <a
-          href={item.link}
-          target={item.source === "Blog" ? "_self" : "_blank"}
-          class="flex justify-between items-center border-b border-dashed border-neutral-700 pb-1 hover:text-neutral-400 transition-colors"
-        >
-          <div class="flex items-center gap-2">
-            <span class={`text-xs px-1.5 py-0.5 rounded ${sourceStyles[item.source]}`}>
-              {item.source}
-            </span>
-            <span class="text-sm line-clamp-1">{item.title}</span>
-          </div>
-          <time class="text-xs text-gray-500 whitespace-nowrap ml-2">
-            {formatDate(item.pubDate)}
-          </time>
-        </a>
-      ))
-    ) : (
-      <p class="text-sm text-gray-500">No posts yet</p>
-    )}
+  <div class="flex flex-col gap-2" id="posts-container">
+    <p class="text-sm text-gray-500">Loading posts...</p>
   </div>
   <div class="flex gap-4 mt-4 text-xs">
     <a href="/posts" class="text-white hover:underline font-medium">
@@ -102,3 +21,65 @@ const sourceStyles = {
     </a>
   </div>
 </Card>
+
+<script>
+  type PostItem = {
+    title: string;
+    link: string;
+    pubDate: string;
+    source: "Zenn" | "note" | "Blog";
+  };
+
+  const sourceStyles: Record<string, string> = {
+    "Blog": "bg-primary-500 text-white",
+    "Zenn": "bg-blue-500 text-white",
+    "note": "bg-green-600 text-white",
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  async function loadPosts() {
+    const container = document.getElementById("posts-container");
+    if (!container) return;
+
+    try {
+      const response = await fetch("/api/posts");
+      if (!response.ok) throw new Error("Failed to fetch");
+
+      const posts: PostItem[] = await response.json();
+
+      if (posts.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-500">No posts yet</p>';
+        return;
+      }
+
+      container.innerHTML = posts.slice(0, 6).map((item) => `
+        <a
+          href="${item.link}"
+          target="${item.source === "Blog" ? "_self" : "_blank"}"
+          class="flex justify-between items-center border-b border-dashed border-neutral-700 pb-1 hover:text-neutral-400 transition-colors"
+        >
+          <div class="flex items-center gap-2">
+            <span class="text-xs px-1.5 py-0.5 rounded ${sourceStyles[item.source]}">
+              ${item.source}
+            </span>
+            <span class="text-sm line-clamp-1">${item.title}</span>
+          </div>
+          <time class="text-xs text-gray-500 whitespace-nowrap ml-2">
+            ${formatDate(item.pubDate)}
+          </time>
+        </a>
+      `).join("");
+    } catch (error) {
+      container.innerHTML = '<p class="text-sm text-gray-500">Failed to load posts</p>';
+    }
+  }
+
+  loadPosts();
+</script>

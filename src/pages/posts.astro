@@ -1,68 +1,7 @@
 ---
-import { getCollection } from "astro:content";
+export const prerender = true;
+
 import BasicLayout from "../layouts/BasicLayout.astro";
-import { fetchRSSFeed } from "../lib/rss-fetch";
-
-type PostItem = {
-  title: string;
-  link: string;
-  pubDate: Date;
-  source: "Zenn" | "note" | "Blog";
-  description?: string;
-};
-
-const posts: PostItem[] = [];
-
-// Internal blog posts
-const blogPosts = await getCollection("blog", ({ data }) => !data.draft);
-blogPosts.forEach((post) => {
-  posts.push({
-    title: post.data.title,
-    link: `/blog/${post.id}`,
-    pubDate: post.data.pubDate,
-    source: "Blog",
-    description: post.data.description,
-  });
-});
-
-// Zenn
-const zennItems = await fetchRSSFeed("https://zenn.dev/r0nr0n/feed");
-zennItems.forEach((item) => {
-  posts.push({
-    title: item.title,
-    link: item.link,
-    pubDate: item.pubDate,
-    source: "Zenn",
-  });
-});
-
-// note
-const noteItems = await fetchRSSFeed("https://note.com/ron0731/rss");
-noteItems.forEach((item) => {
-  posts.push({
-    title: item.title,
-    link: item.link,
-    pubDate: item.pubDate,
-    source: "note",
-  });
-});
-
-// Sort by date
-posts.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
-
-const formatDate = (date: Date) => {
-  return date.toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
-const sourceStyles = {
-  "Blog": "bg-primary-500 text-white",
-  "Zenn": "bg-blue-500 text-white",
-  "note": "bg-green-600 text-white",
-};
 ---
 
 <BasicLayout title="All Posts - Ryo Nakayama" description="All posts from Blog, Zenn, and note">
@@ -73,41 +12,14 @@ const sourceStyles = {
 
     <h1 class="text-3xl font-bold mt-6 mb-4">All Posts</h1>
 
-    <div class="flex gap-4 mb-8 text-sm">
+    <div class="flex gap-4 mb-8 text-sm" id="posts-summary">
       <span class="text-gray-400">Sources:</span>
-      <a href="/blog" class="text-primary-400 hover:underline">Blog ({posts.filter(p => p.source === "Blog").length})</a>
-      <a href="https://zenn.dev/r0nr0n" target="_blank" class="text-blue-400 hover:underline">Zenn ({posts.filter(p => p.source === "Zenn").length})</a>
-      <a href="https://note.com/ron0731" target="_blank" class="text-green-400 hover:underline">note ({posts.filter(p => p.source === "note").length})</a>
+      <span class="text-gray-500">Loading...</span>
     </div>
 
-    <ul class="space-y-4">
-      {posts.map((post) => (
-        <li class="border-b border-neutral-700 pb-4">
-          <a
-            href={post.link}
-            target={post.source === "Blog" ? "_self" : "_blank"}
-            class="group block"
-          >
-            <div class="flex items-center gap-2 mb-1">
-              <span class={`text-xs px-1.5 py-0.5 rounded ${sourceStyles[post.source]}`}>
-                {post.source}
-              </span>
-              <h2 class="text-lg font-medium group-hover:text-primary-400 transition-colors">
-                {post.title}
-              </h2>
-            </div>
-            {post.description && (
-              <p class="text-gray-400 text-sm line-clamp-2">{post.description}</p>
-            )}
-            <time class="text-xs text-gray-500 mt-1 block">{formatDate(post.pubDate)}</time>
-          </a>
-        </li>
-      ))}
+    <ul class="space-y-4" id="posts-list">
+      <li class="text-gray-500">Loading posts...</li>
     </ul>
-
-    {posts.length === 0 && (
-      <p class="text-gray-500">No posts yet.</p>
-    )}
   </main>
 </BasicLayout>
 
@@ -118,3 +30,83 @@ const sourceStyles = {
     min-height: 100vh;
   }
 </style>
+
+<script>
+  type PostItem = {
+    title: string;
+    link: string;
+    pubDate: string;
+    source: "Zenn" | "note" | "Blog";
+    description?: string;
+  };
+
+  const sourceStyles: Record<string, string> = {
+    "Blog": "bg-primary-500 text-white",
+    "Zenn": "bg-blue-500 text-white",
+    "note": "bg-green-600 text-white",
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  async function loadPosts() {
+    const listContainer = document.getElementById("posts-list");
+    const summaryContainer = document.getElementById("posts-summary");
+    if (!listContainer || !summaryContainer) return;
+
+    try {
+      const response = await fetch("/api/posts");
+      if (!response.ok) throw new Error("Failed to fetch");
+
+      const posts: PostItem[] = await response.json();
+
+      if (posts.length === 0) {
+        listContainer.innerHTML = '<li class="text-gray-500">No posts yet.</li>';
+        return;
+      }
+
+      // Update summary
+      const blogCount = posts.filter(p => p.source === "Blog").length;
+      const zennCount = posts.filter(p => p.source === "Zenn").length;
+      const noteCount = posts.filter(p => p.source === "note").length;
+
+      summaryContainer.innerHTML = `
+        <span class="text-gray-400">Sources:</span>
+        <a href="/blog" class="text-primary-400 hover:underline">Blog (${blogCount})</a>
+        <a href="https://zenn.dev/r0nr0n" target="_blank" class="text-blue-400 hover:underline">Zenn (${zennCount})</a>
+        <a href="https://note.com/ron0731" target="_blank" class="text-green-400 hover:underline">note (${noteCount})</a>
+      `;
+
+      // Render posts
+      listContainer.innerHTML = posts.map((post) => `
+        <li class="border-b border-neutral-700 pb-4">
+          <a
+            href="${post.link}"
+            target="${post.source === "Blog" ? "_self" : "_blank"}"
+            class="group block"
+          >
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs px-1.5 py-0.5 rounded ${sourceStyles[post.source]}">
+                ${post.source}
+              </span>
+              <h2 class="text-lg font-medium group-hover:text-primary-400 transition-colors">
+                ${post.title}
+              </h2>
+            </div>
+            ${post.description ? `<p class="text-gray-400 text-sm line-clamp-2">${post.description}</p>` : ""}
+            <time class="text-xs text-gray-500 mt-1 block">${formatDate(post.pubDate)}</time>
+          </a>
+        </li>
+      `).join("");
+    } catch (error) {
+      listContainer.innerHTML = '<li class="text-gray-500">Failed to load posts.</li>';
+    }
+  }
+
+  loadPosts();
+</script>
