@@ -37,6 +37,7 @@ export default defineConfig({
     sessions: {
       enabled: false,
     },
+    imageService: "compile",
   }),
   vite: {
     assetsInclude: "**/*.riv",
