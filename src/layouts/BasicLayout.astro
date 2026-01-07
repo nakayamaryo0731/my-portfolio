@@ -73,8 +73,7 @@ const schema =
   <head>
     <meta charset="UTF-8" />
     <meta content="width=device-width" name="viewport" />
-    <link href="/favicon.ico" rel="icon" type="image/x-icon" />
-    <meta content={Astro.generator} name="generator" />
+        <meta content={Astro.generator} name="generator" />
     <title>{title}</title>
     <meta content={description} name="description" />
     <meta content="index, follow" name="robots" />
@@ -112,6 +111,7 @@ const schema =
   <body
     class="bg-darkslate-700 md:h-screen flex flex-col justify-center items-center"
   >
+    <div class="grid-background"></div>
     <slot name="loader" />
     <slot />
   </body>
@@ -155,5 +155,18 @@ const schema =
 
   b {
     font-weight: 700 !important;
+  }
+
+  .grid-background {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-image:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: linear-gradient(to bottom, black 0%, black 20%, transparent 70%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 20%, transparent 70%);
+    pointer-events: none;
   }
 </style>

@@ -1,0 +1,77 @@
+---
+export const prerender = true;
+
+import { getCollection, render } from "astro:content";
+import BasicLayout from "../../layouts/BasicLayout.astro";
+
+export async function getStaticPaths() {
+  const projects = await getCollection("projects");
+  return projects.map((project) => ({
+    params: { id: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+---
+
+<BasicLayout title={`${project.data.title} - Projects`} description={project.data.description}>
+  <main class="text-white m-auto px-6 py-12 max-w-3xl min-h-screen">
+    <a href="/projects" class="text-sm text-gray-400 hover:text-white mb-4 inline-block">
+      ← Back to Projects
+    </a>
+
+    <article class="mt-6">
+      <header class="mb-8">
+        <h1 class="text-3xl font-bold mb-2">{project.data.title}</h1>
+        <p class="text-gray-400 text-lg">{project.data.description}</p>
+
+        {project.data.tags && (
+          <div class="flex flex-wrap gap-2 mt-3">
+            {project.data.tags.map((tag: string) => (
+              <span class="text-xs bg-neutral-700 px-2 py-1 rounded">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div class="flex gap-4 mt-4">
+          {project.data.url && (
+            <a
+              href={project.data.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-sm text-primary-400 hover:underline"
+            >
+              Visit Site →
+            </a>
+          )}
+          {project.data.github && (
+            <a
+              href={project.data.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-sm text-primary-400 hover:underline"
+            >
+              GitHub →
+            </a>
+          )}
+        </div>
+      </header>
+
+      <div class="prose prose-invert max-w-none">
+        <Content />
+      </div>
+    </article>
+  </main>
+</BasicLayout>
+
+<style>
+  body {
+    justify-content: flex-start !important;
+    height: auto !important;
+    min-height: 100vh;
+  }
+</style>

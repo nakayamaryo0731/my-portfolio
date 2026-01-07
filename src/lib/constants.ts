@@ -10,3 +10,23 @@ export const loaderAnimation = [
   { opacity: [1, 0], pointerEvents: "none" },
   { easing: "ease-out" },
 ];
+
+export const GLOBE_CONFIG = {
+  sensitivity: 75,
+  rotateSpeed: 1,
+  timerInterval: 200,
+  visitedCountries: [
+    "Japan",
+    "Thailand",
+    "Italy",
+    "Finland",
+    "Czechia",
+    "USA", // Hawaii
+  ],
+  colors: {
+    globe: "#EEE",
+    visited: "#E63946",
+    unvisited: "white",
+    stroke: "black",
+  },
+};
