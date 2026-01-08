@@ -9,6 +9,9 @@ export default defineConfig({
     'text-xs', 'text-sm', 'text-gray-500', 'px-1.5', 'py-0.5', 'rounded',
     'line-clamp-1', 'whitespace-nowrap', 'ml-2',
     'bg-primary-500', 'bg-blue-500', 'bg-green-600', 'text-white',
+    // Posts page dynamic classes
+    'hidden', '-rotate-90', 'text-primary-400', 'text-gray-400',
+    'bg-neutral-700', 'bg-neutral-600', 'text-gray-200',
   ],
   content: {
     filesystem: [

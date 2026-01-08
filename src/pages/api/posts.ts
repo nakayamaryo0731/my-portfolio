@@ -10,6 +10,7 @@ type PostItem = {
   pubDate: string;
   source: "Zenn" | "note" | "Blog";
   description?: string;
+  tags?: string[];
 };
 
 export const GET: APIRoute = async () => {
@@ -24,6 +25,7 @@ export const GET: APIRoute = async () => {
       pubDate: post.data.pubDate.toISOString(),
       source: "Blog",
       description: post.data.description,
+      tags: post.data.tags,
     });
   });
 
