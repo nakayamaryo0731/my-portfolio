@@ -1,18 +1,17 @@
 ---
-import { LINKS } from "../lib/constants";
+import { LINKS, SITE_OWNER } from "../lib/constants";
 
 interface Props {
   title: string;
   description: string;
   page?: "travel" | "blog";
-  slug?: string | undefined;
   pubDate?: string;
 }
 
 const { title, description, page, pubDate } = Astro.props;
 const image =
   page === "travel"
-    ? `${Astro.url.origin}/globe_preview.webp"`
+    ? `${Astro.url.origin}/globe_preview.webp`
     : `${Astro.url.origin}/og-image.png`;
 
 const schema =
@@ -20,23 +19,14 @@ const schema =
     ? {
         "@context": "http://schema.org",
         "@type": "Person",
-        name: "Gianmarco",
+        name: SITE_OWNER.name,
         url: Astro.url.origin,
         sameAs: [LINKS.linkedin, LINKS.github],
         image: `${Astro.url.origin}/og-image.png`,
-        jobTitle: "Freelance Frontend Developer",
-        worksFor: {
-          "@type": "Organization",
-          name: "Self-Employed",
-          address: {
-            "@type": "PostalAddress",
-            addressLocality: "Italy",
-            addressCountry: "IT",
-          },
-        },
+        jobTitle: SITE_OWNER.jobTitle,
         nationality: {
           "@type": "Country",
-          name: "Italy",
+          name: SITE_OWNER.country,
         },
       }
     : {
@@ -46,18 +36,18 @@ const schema =
           "@type": "WebPage",
           "@id": Astro.url.href,
         },
-        headline: title || title,
+        headline: title,
         description: description || title,
-        image: `${Astro.url.origin}/og-image.png`, //TODO: dynamic
+        image: `${Astro.url.origin}/og-image.png`,
         author: {
           "@type": "Person",
-          name: "Gianmarco",
+          name: SITE_OWNER.name,
           url: Astro.url.origin,
           sameAs: [LINKS.linkedin, LINKS.github],
         },
         publisher: {
           "@type": "Organization",
-          name: "Gianmarco",
+          name: SITE_OWNER.name,
           logo: {
             "@type": "ImageObject",
             url: `${Astro.url.origin}/og-image.png`,

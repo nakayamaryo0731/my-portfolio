@@ -1,0 +1,31 @@
+---
+import BasicLayout from "./BasicLayout.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  heading: string;
+}
+
+const { title, description, heading } = Astro.props;
+---
+
+<BasicLayout title={title} description={description}>
+  <main class="text-white m-auto px-6 py-12 max-w-3xl min-h-screen">
+    <a href="/" class="text-sm text-gray-400 hover:text-white mb-4 inline-block">
+      ← Back to Home
+    </a>
+
+    <h1 class="text-3xl font-bold mt-6 mb-8">{heading}</h1>
+
+    <slot />
+  </main>
+</BasicLayout>
+
+<style>
+  body {
+    justify-content: flex-start !important;
+    height: auto !important;
+    min-height: 100vh;
+  }
+</style>

@@ -1,7 +1,7 @@
 // Posts page client-side logic
 import type { PostItem } from "./types";
-import { SOURCE_STYLES, EXTERNAL_URLS } from "./constants";
-import { formatDateJP } from "./helpers";
+import { EXTERNAL_URLS } from "./constants";
+import { formatDateJP, getPostTarget, renderSourceBadge } from "./helpers";
 
 const getYearMonth = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -29,9 +29,9 @@ function renderPosts(posts: PostItem[]) {
 
   listContainer.innerHTML = posts.map((post) => `
     <li class="border-b border-neutral-700 pb-4">
-      <a href="${post.link}" target="${post.source === "Blog" ? "_self" : "_blank"}" class="group block">
+      <a href="${post.link}" target="${getPostTarget(post.source)}" class="group block">
         <div class="flex items-center gap-2 mb-1 flex-wrap">
-          <span class="text-xs px-1.5 py-0.5 rounded ${SOURCE_STYLES[post.source]}">${post.source}</span>
+          ${renderSourceBadge(post.source)}
           <h2 class="text-lg font-medium group-hover:text-primary-400 transition-colors">${post.title}</h2>
         </div>
         ${post.description ? `<p class="text-gray-400 text-sm line-clamp-2">${post.description}</p>` : ""}
@@ -88,7 +88,7 @@ function setupArchive(posts: PostItem[]) {
     return `
       <div class="mb-1">
         <div class="archive-year flex items-center gap-2 py-1 cursor-pointer text-sm text-gray-200 hover:text-white" data-year="${year}">
-          <svg class="w-4 h-4 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+          <svg style="width: 1rem; height: 1rem;" class="transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
           </svg>
           <span>${year}</span>
@@ -173,7 +173,7 @@ function setupTags(posts: PostItem[]) {
 
   const renderTags = (container: HTMLElement) => {
     container.innerHTML = tags.map(tag =>
-      `<span class="tag-chip px-2.5 py-1 text-xs rounded-full bg-neutral-700 text-gray-400 cursor-pointer transition-all hover:bg-neutral-600 hover:text-gray-200" data-tag="${tag}">${tag}</span>`
+      `<span class="tag-chip text-xs rounded-full bg-neutral-700 text-gray-400 cursor-pointer transition-all hover:bg-neutral-600 hover:text-gray-200" style="padding: 0.25rem 0.75rem;" data-tag="${tag}">${tag}</span>`
     ).join("");
 
     container.querySelectorAll(".tag-chip").forEach(chip => {

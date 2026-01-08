@@ -1,5 +1,6 @@
 ---
 import Card from "./Card/index.astro";
+import { Icon } from "astro-icon/components";
 ---
 
 <Card colSpan="lg:col-span-1" rowSpan="md:row-span-1">
@@ -8,19 +9,9 @@ import Card from "./Card/index.astro";
     class="flex items-center justify-between w-full h-full group"
   >
     <span class="text-xl font-medium">Projects</span>
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
+    <Icon
+      name="ri:arrow-right-up-line"
       class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M7 17L17 7M17 7H7M17 7v10"
-      />
-    </svg>
+    />
   </a>
 </Card>

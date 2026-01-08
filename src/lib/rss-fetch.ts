@@ -1,10 +1,40 @@
-// Native RSS fetcher for Cloudflare Workers compatibility
+// RSS fetcher using fast-xml-parser for reliable parsing
+import { XMLParser } from "fast-xml-parser";
 import type { FeedItem } from "./types";
+
+interface RSSItem {
+  title?: string;
+  link?: string;
+  pubDate?: string;
+}
+
+interface AtomEntry {
+  title?: string;
+  link?: string | { "@_href"?: string };
+  published?: string;
+  updated?: string;
+}
+
+interface ParsedRSS {
+  rss?: {
+    channel?: {
+      item?: RSSItem | RSSItem[];
+    };
+  };
+  feed?: {
+    entry?: AtomEntry | AtomEntry[];
+  };
+}
+
+const parser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: "@_",
+});
 
 export async function fetchRSSFeed(url: string): Promise<FeedItem[]> {
   try {
     const response = await fetch(url, {
-      signal: AbortSignal.timeout(5000), // 5秒タイムアウト
+      signal: AbortSignal.timeout(5000),
     });
     if (!response.ok) {
       return [];
@@ -18,51 +48,48 @@ export async function fetchRSSFeed(url: string): Promise<FeedItem[]> {
 }
 
 function parseRSS(xml: string): FeedItem[] {
+  const parsed = parser.parse(xml) as ParsedRSS;
   const items: FeedItem[] = [];
 
-  // Match <item> or <entry> elements (RSS 2.0 and Atom)
-  const itemRegex = /<item[^>]*>([\s\S]*?)<\/item>|<entry[^>]*>([\s\S]*?)<\/entry>/gi;
-  let match;
+  // RSS 2.0 format
+  if (parsed.rss?.channel?.item) {
+    const rssItems = Array.isArray(parsed.rss.channel.item)
+      ? parsed.rss.channel.item
+      : [parsed.rss.channel.item];
 
-  while ((match = itemRegex.exec(xml)) !== null) {
-    const itemContent = match[1] || match[2];
-
-    // Extract title
-    const titleMatch = itemContent.match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/i);
-    const title = titleMatch ? decodeHTMLEntities(titleMatch[1].trim()) : "";
-
-    // Extract link (RSS 2.0 style or Atom style)
-    let link = "";
-    const linkMatch = itemContent.match(/<link[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/link>/i);
-    if (linkMatch) {
-      link = linkMatch[1].trim();
-    } else {
-      // Atom style: <link href="..." />
-      const atomLinkMatch = itemContent.match(/<link[^>]*href=["']([^"']+)["'][^>]*\/?>/i);
-      if (atomLinkMatch) {
-        link = atomLinkMatch[1];
+    for (const item of rssItems) {
+      if (item.title && item.link) {
+        items.push({
+          title: item.title,
+          link: item.link,
+          pubDate: item.pubDate ? new Date(item.pubDate) : new Date(),
+        });
       }
     }
+  }
 
-    // Extract pubDate or published
-    const dateMatch = itemContent.match(/<pubDate[^>]*>([\s\S]*?)<\/pubDate>|<published[^>]*>([\s\S]*?)<\/published>|<updated[^>]*>([\s\S]*?)<\/updated>/i);
-    const dateStr = dateMatch ? (dateMatch[1] || dateMatch[2] || dateMatch[3]).trim() : "";
-    const pubDate = dateStr ? new Date(dateStr) : new Date();
+  // Atom format
+  if (parsed.feed?.entry) {
+    const entries = Array.isArray(parsed.feed.entry)
+      ? parsed.feed.entry
+      : [parsed.feed.entry];
 
-    if (title && link) {
-      items.push({ title, link, pubDate });
+    for (const entry of entries) {
+      const link =
+        typeof entry.link === "string"
+          ? entry.link
+          : entry.link?.["@_href"] ?? "";
+      const dateStr = entry.published || entry.updated;
+
+      if (entry.title && link) {
+        items.push({
+          title: entry.title,
+          link,
+          pubDate: dateStr ? new Date(dateStr) : new Date(),
+        });
+      }
     }
   }
 
   return items;
-}
-
-function decodeHTMLEntities(text: string): string {
-  return text
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ");
 }

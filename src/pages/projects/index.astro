@@ -2,51 +2,35 @@
 export const prerender = true;
 
 import { getCollection } from "astro:content";
-import BasicLayout from "../../layouts/BasicLayout.astro";
+import ListPageLayout from "../../layouts/ListPageLayout.astro";
 
 const projects = await getCollection("projects");
 ---
 
-<BasicLayout title="Projects - Ryo Nakayama" description="My projects">
-  <main class="text-white m-auto px-6 py-12 max-w-3xl min-h-screen">
-    <a href="/" class="text-sm text-gray-400 hover:text-white mb-4 inline-block">
-      ← Back to Home
-    </a>
+<ListPageLayout title="Projects - Ryo Nakayama" description="My projects" heading="Projects">
+  <ul class="space-y-6">
+    {projects.map((project) => (
+      <li class="border-b border-neutral-700 pb-6">
+        <a href={`/projects/${project.id}`} class="group block">
+          <h2 class="text-xl font-medium group-hover:text-primary-400 transition-colors">
+            {project.data.title}
+          </h2>
+          <p class="text-gray-400 text-sm mt-1">{project.data.description}</p>
+          {project.data.tags && (
+            <div class="flex flex-wrap gap-2 mt-2">
+              {project.data.tags.map((tag: string) => (
+                <span class="text-xs bg-neutral-700 px-2 py-1 rounded">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </a>
+      </li>
+    ))}
+  </ul>
 
-    <h1 class="text-3xl font-bold mt-6 mb-8">Projects</h1>
-
-    <ul class="space-y-6">
-      {projects.map((project) => (
-        <li class="border-b border-neutral-700 pb-6">
-          <a href={`/projects/${project.id}`} class="group block">
-            <h2 class="text-xl font-medium group-hover:text-primary-400 transition-colors">
-              {project.data.title}
-            </h2>
-            <p class="text-gray-400 text-sm mt-1">{project.data.description}</p>
-            {project.data.tags && (
-              <div class="flex flex-wrap gap-2 mt-2">
-                {project.data.tags.map((tag: string) => (
-                  <span class="text-xs bg-neutral-700 px-2 py-1 rounded">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </a>
-        </li>
-      ))}
-    </ul>
-
-    {projects.length === 0 && (
-      <p class="text-gray-500">No projects yet.</p>
-    )}
-  </main>
-</BasicLayout>
-
-<style>
-  body {
-    justify-content: flex-start !important;
-    height: auto !important;
-    min-height: 100vh;
-  }
-</style>
+  {projects.length === 0 && (
+    <p class="text-gray-500">No projects yet.</p>
+  )}
+</ListPageLayout>

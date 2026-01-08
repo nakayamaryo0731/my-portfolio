@@ -1,6 +1,19 @@
+import type { PostSource } from "./types";
+import { SOURCE_STYLES } from "./constants";
+
 export function trimText(input: string, maxLength: number = 100): string {
   if (input.length <= maxLength) return input;
   return input.substring(0, maxLength - 3) + "...";
+}
+
+/** Returns the appropriate link target for a post source */
+export function getPostTarget(source: PostSource): "_self" | "_blank" {
+  return source === "Blog" ? "_self" : "_blank";
+}
+
+/** Generates HTML for a source badge */
+export function renderSourceBadge(source: PostSource): string {
+  return `<span class="text-xs px-1.5 py-0.5 rounded ${SOURCE_STYLES[source]}">${source}</span>`;
 }
 
 export function formatTimeForJapan(date: Date): string {

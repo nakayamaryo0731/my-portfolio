@@ -1,6 +1,6 @@
 ---
 import Card from "./Card/index.astro";
-import GlobeMini from "./GlobeMini.tsx";
+import Globe from "./Globe.tsx";
 ---
 
 <Card
@@ -11,6 +11,6 @@ import GlobeMini from "./GlobeMini.tsx";
   colorText="text-neutral-900"
 >
   <div class="h-full w-full absolute inset-0 -z-10">
-    <GlobeMini client:load />
+    <Globe size={500} draggable={false} client:load />
   </div>
 </Card>

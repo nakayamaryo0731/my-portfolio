@@ -1,7 +1,7 @@
 ---
 export const prerender = true;
 
-import BasicLayout from "../../layouts/BasicLayout.astro";
+import ListPageLayout from "../../layouts/ListPageLayout.astro";
 
 const races = [
   { name: "東京マラソン 2024", date: "2024-03-03", distance: "42.195km", time: "3:45:00" },
@@ -16,85 +16,69 @@ const bands = [
 ];
 ---
 
-<BasicLayout title="Hobbies - Ryo Nakayama" description="My hobbies">
-  <main class="text-white m-auto px-6 py-12 max-w-3xl min-h-screen">
-    <a href="/" class="text-sm text-gray-400 hover:text-white mb-4 inline-block">
-      ← Back to Home
-    </a>
+<ListPageLayout title="Hobbies - Ryo Nakayama" description="My hobbies" heading="Hobbies">
+  <!-- Marathon / Trail Running -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-bold mb-4">Marathon / Trail Running</h2>
+    <p class="text-gray-400 mb-6">
+      I enjoy running marathons and trail races. Here are some races I've participated in.
+    </p>
 
-    <h1 class="text-3xl font-bold mt-6 mb-8">Hobbies</h1>
-
-    <!-- Marathon / Trail Running -->
-    <section class="mb-12">
-      <h2 class="text-2xl font-bold mb-4">Marathon / Trail Running</h2>
-      <p class="text-gray-400 mb-6">
-        I enjoy running marathons and trail races. Here are some races I've participated in.
-      </p>
-
-      {races.length > 0 ? (
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="border-b border-neutral-700">
-                <th class="text-left py-2">Race</th>
-                <th class="text-left py-2">Date</th>
-                <th class="text-left py-2">Distance</th>
-                <th class="text-left py-2">Time</th>
+    {races.length > 0 ? (
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-neutral-700">
+              <th class="text-left py-2">Race</th>
+              <th class="text-left py-2">Date</th>
+              <th class="text-left py-2">Distance</th>
+              <th class="text-left py-2">Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {races.map((race) => (
+              <tr class="border-b border-neutral-800">
+                <td class="py-2">{race.name}</td>
+                <td class="py-2 text-gray-400">{race.date}</td>
+                <td class="py-2 text-gray-400">{race.distance}</td>
+                <td class="py-2 text-gray-400">{race.time}</td>
               </tr>
-            </thead>
-            <tbody>
-              {races.map((race) => (
-                <tr class="border-b border-neutral-800">
-                  <td class="py-2">{race.name}</td>
-                  <td class="py-2 text-gray-400">{race.date}</td>
-                  <td class="py-2 text-gray-400">{race.distance}</td>
-                  <td class="py-2 text-gray-400">{race.time}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p class="text-gray-500">Race records coming soon...</p>
-      )}
-    </section>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <p class="text-gray-500">Race records coming soon...</p>
+    )}
+  </section>
 
-    <!-- Cooking -->
-    <section class="mb-12">
-      <h2 class="text-2xl font-bold mb-4">Cooking</h2>
-      <p class="text-gray-400 mb-6">
-        I enjoy cooking in my free time.
-      </p>
+  <!-- Cooking -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-bold mb-4">Cooking</h2>
+    <p class="text-gray-400 mb-6">
+      I enjoy cooking in my free time.
+    </p>
+    <p class="text-gray-500">Details coming soon...</p>
+  </section>
+
+  <!-- Band -->
+  <section>
+    <h2 class="text-2xl font-bold mb-4">Band</h2>
+    <p class="text-gray-400 mb-6">
+      I play in a band as a hobby.
+    </p>
+
+    {bands.length > 0 ? (
+      <ul class="space-y-4">
+        {bands.map((band) => (
+          <li class="border-b border-neutral-800 pb-4">
+            <h3 class="font-medium">{band.name}</h3>
+            <p class="text-gray-400 text-sm">{band.role} · {band.period}</p>
+          </li>
+        ))}
+      </ul>
+    ) : (
       <p class="text-gray-500">Details coming soon...</p>
-    </section>
-
-    <!-- Band -->
-    <section>
-      <h2 class="text-2xl font-bold mb-4">Band</h2>
-      <p class="text-gray-400 mb-6">
-        I play in a band as a hobby.
-      </p>
-
-      {bands.length > 0 ? (
-        <ul class="space-y-4">
-          {bands.map((band) => (
-            <li class="border-b border-neutral-800 pb-4">
-              <h3 class="font-medium">{band.name}</h3>
-              <p class="text-gray-400 text-sm">{band.role} · {band.period}</p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p class="text-gray-500">Details coming soon...</p>
-      )}
-    </section>
-  </main>
-</BasicLayout>
-
-<style>
-  body {
-    justify-content: flex-start !important;
-    height: auto !important;
-    min-height: 100vh;
-  }
-</style>
+    )}
+  </section>
+</ListPageLayout>

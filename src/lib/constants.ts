@@ -1,3 +1,10 @@
+export const SITE_OWNER = {
+  name: "Ryo Nakayama",
+  jobTitle: "Software Engineer",
+  country: "Japan",
+  countryCode: "JP",
+};
+
 export const LINKS = {
   github: "https://github.com/nakayamaryo0731",
   linkedin: "https://www.linkedin.com/in/nakayama-ryo-707a86188/",
