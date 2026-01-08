@@ -1,17 +1,10 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 import { fetchRSSFeed } from "../../lib/rss-fetch";
+import { RSS_FEEDS } from "../../lib/constants";
+import type { PostItem } from "../../lib/types";
 
 export const prerender = false;
-
-type PostItem = {
-  title: string;
-  link: string;
-  pubDate: string;
-  source: "Zenn" | "note" | "Blog";
-  description?: string;
-  tags?: string[];
-};
 
 export const GET: APIRoute = async () => {
   const posts: PostItem[] = [];
@@ -30,7 +23,7 @@ export const GET: APIRoute = async () => {
   });
 
   // Zenn
-  const zennItems = await fetchRSSFeed("https://zenn.dev/r0nr0n/feed");
+  const zennItems = await fetchRSSFeed(RSS_FEEDS.zenn);
   zennItems.forEach((item) => {
     posts.push({
       title: item.title,
@@ -41,7 +34,7 @@ export const GET: APIRoute = async () => {
   });
 
   // note
-  const noteItems = await fetchRSSFeed("https://note.com/ron0731/rss");
+  const noteItems = await fetchRSSFeed(RSS_FEEDS.note);
   noteItems.forEach((item) => {
     posts.push({
       title: item.title,

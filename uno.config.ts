@@ -2,25 +2,19 @@
 import { defineConfig, presetWind3, presetWebFonts, presetTypography } from "unocss";
 
 export default defineConfig({
+  // Only classes dynamically generated in JavaScript need to be in safelist
   safelist: [
-    'flex', 'justify-between', 'items-center', 'gap-2',
-    'border-b', 'border-dashed', 'border-neutral-700', 'pb-1',
-    'hover:text-neutral-400', 'transition-colors',
-    'text-xs', 'text-sm', 'text-gray-500', 'px-1.5', 'py-0.5', 'rounded',
-    'line-clamp-1', 'whitespace-nowrap', 'ml-2',
+    // PostsCard.astro - source badges
     'bg-primary-500', 'bg-blue-500', 'bg-green-600', 'text-white',
-    // Posts page dynamic classes
+    // posts.astro - archive toggle & tag filter
     'hidden', '-rotate-90', 'text-primary-400', 'text-gray-400',
     'bg-neutral-700', 'bg-neutral-600', 'text-gray-200',
   ],
   content: {
     filesystem: [
-      // Narrow scope to specific directories
-      "src/**/*.{html,js,ts,jsx,tsx,vue,svelte,astro}}",
-      "src/components/**/*.{html,js,ts,jsx,tsx,vue,svelte,astro}}",
-      "src/pages/**/*.{html,js,ts,jsx,tsx,vue,svelte,astro}}",
-      "src/layouts/**/*.{html,js,ts,jsx,tsx,vue,svelte,astro}}"
-    ],  },
+      "src/**/*.{html,js,ts,jsx,tsx,vue,svelte,astro}",
+    ],
+  },
   theme: {
     boxShadow: {
       custom: `2px 2px 0`,

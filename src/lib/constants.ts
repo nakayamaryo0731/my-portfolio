@@ -11,6 +11,25 @@ export const loaderAnimation = [
   { easing: "ease-out" },
 ];
 
+// Post source badge styles (used in client-side scripts)
+export const SOURCE_STYLES: Record<string, string> = {
+  Blog: "bg-primary-500 text-white",
+  Zenn: "bg-blue-500 text-white",
+  note: "bg-green-600 text-white",
+};
+
+// External RSS feeds
+export const RSS_FEEDS = {
+  zenn: "https://zenn.dev/r0nr0n/feed",
+  note: "https://note.com/ron0731/rss",
+};
+
+// External profile URLs
+export const EXTERNAL_URLS = {
+  zenn: "https://zenn.dev/r0nr0n",
+  note: "https://note.com/ron0731",
+};
+
 export const GLOBE_CONFIG = {
   sensitivity: 75,
   rotateSpeed: 1,

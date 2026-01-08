@@ -1,5 +1,5 @@
 ---
-import { getCurrentTimeInJapan, formatTimeForJapan } from "../lib/helpers";
+import { formatTimeForJapan } from "../lib/helpers";
 import Card from "./Card/index.astro";
 ---
 
@@ -32,6 +32,6 @@ import Card from "./Card/index.astro";
   <time
     class="text-xl xl:text-3xl whitespace-nowrap h-[calc(100%-28px)] font-serif flex justify-center items-center"     datetime=""     id="timeDisplay"
   >
-    {formatTimeForJapan(getCurrentTimeInJapan())}
+    {formatTimeForJapan(new Date())}
   </time>
 </Card>
