@@ -1,19 +1,51 @@
 import { onMount } from "solid-js";
 import * as d3 from "d3";
+import type { GeoPermissibleObjects } from "d3";
 import worldData from "../lib/world.json";
 import { GLOBE_CONFIG } from "../lib/constants";
 
-const GlobeComponent = () => {
+// GeoJSON Feature type for world data
+interface GeoFeature {
+  type: "Feature";
+  properties: {
+    name: string;
+  };
+  geometry: GeoPermissibleObjects;
+}
+
+interface WorldData {
+  type: "FeatureCollection";
+  features: GeoFeature[];
+}
+
+interface GlobeProps {
+  /** Fixed size in pixels, or 'responsive' for window-based sizing */
+  size?: number | "responsive";
+  /** Enable drag to rotate interaction */
+  draggable?: boolean;
+}
+
+const Globe = (props: GlobeProps) => {
   let mapContainer: HTMLDivElement | undefined;
+
+  // Default values
+  const size = () => props.size ?? "responsive";
+  const draggable = () => props.draggable ?? true;
 
   onMount(() => {
     if (!mapContainer) return;
 
-    const width = Math.min(window.innerWidth * 0.9, 600);
-    const height = Math.min(window.innerHeight * 0.6, 600);
+    // Calculate dimensions based on size prop
+    const isResponsive = size() === "responsive";
+    const width = isResponsive
+      ? Math.min(window.innerWidth * 0.9, 600)
+      : (size() as number);
+    const height = isResponsive
+      ? Math.min(window.innerHeight * 0.6, 600)
+      : (size() as number);
     const scale = Math.min(width, height) / 2.2;
 
-    let projection = d3
+    const projection = d3
       .geoOrthographic()
       .scale(scale)
       .center([0, 0])
@@ -21,14 +53,18 @@ const GlobeComponent = () => {
       .translate([width / 2, height / 2]);
 
     const initialScale = projection.scale();
-    let pathGenerator = d3.geoPath().projection(projection);
+    const pathGenerator = d3.geoPath().projection(projection);
 
-    let svg = d3
+    const svg = d3
       .select(mapContainer)
       .append("svg")
       .attr("width", width)
-      .attr("height", height)
-      .style("cursor", "grab");
+      .attr("height", height);
+
+    // Only show grab cursor if draggable
+    if (draggable()) {
+      svg.style("cursor", "grab");
+    }
 
     svg
       .append("circle")
@@ -39,17 +75,18 @@ const GlobeComponent = () => {
       .attr("cy", height / 2)
       .attr("r", initialScale);
 
-    let map = svg.append("g");
+    const map = svg.append("g");
+    const typedWorldData = worldData as WorldData;
 
     map
       .append("g")
       .attr("class", "countries")
       .selectAll("path")
-      .data((worldData as any).features)
+      .data(typedWorldData.features)
       .enter()
       .append("path")
-      .attr("d", (d: any) => pathGenerator(d as any))
-      .attr("fill", (d: { properties: { name: string } }) =>
+      .attr("d", (d) => pathGenerator(d.geometry) ?? "")
+      .attr("fill", (d) =>
         GLOBE_CONFIG.visitedCountries.includes(d.properties.name)
           ? GLOBE_CONFIG.colors.visited
           : GLOBE_CONFIG.colors.unvisited
@@ -58,28 +95,38 @@ const GlobeComponent = () => {
       .style("stroke-width", 0.3)
       .style("opacity", 0.8);
 
-    // Drag to rotate
+    // Update all paths helper
+    const updatePaths = () => {
+      svg.selectAll<SVGPathElement, GeoFeature>("path").attr("d", (d) =>
+        pathGenerator(d.geometry) ?? ""
+      );
+    };
+
+    // Drag to rotate (only if draggable)
     let isDragging = false;
-    (svg as any).call(
-      d3.drag<SVGSVGElement, unknown>()
-        .on("start", () => {
-          isDragging = true;
-          svg.style("cursor", "grabbing");
-        })
-        .on("drag", (event: d3.D3DragEvent<SVGSVGElement, unknown, unknown>) => {
-          const rotate = projection.rotate();
-          const k = GLOBE_CONFIG.sensitivity / projection.scale();
-          projection.rotate([
-            rotate[0] + event.dx * k,
-            rotate[1] - event.dy * k,
-          ]);
-          svg.selectAll("path").attr("d", (d: any) => pathGenerator(d as any));
-        })
-        .on("end", () => {
-          isDragging = false;
-          svg.style("cursor", "grab");
-        })
-    );
+    if (draggable()) {
+      svg.call(
+        d3
+          .drag<SVGSVGElement, unknown>()
+          .on("start", () => {
+            isDragging = true;
+            svg.style("cursor", "grabbing");
+          })
+          .on("drag", (event) => {
+            const rotate = projection.rotate();
+            const k = GLOBE_CONFIG.sensitivity / projection.scale();
+            projection.rotate([
+              rotate[0] + event.dx * k,
+              rotate[1] - event.dy * k,
+            ]);
+            updatePaths();
+          })
+          .on("end", () => {
+            isDragging = false;
+            svg.style("cursor", "grab");
+          })
+      );
+    }
 
     // Auto rotate when not dragging
     d3.timer(() => {
@@ -87,16 +134,22 @@ const GlobeComponent = () => {
         const rotate = projection.rotate();
         const k = GLOBE_CONFIG.sensitivity / projection.scale();
         projection.rotate([rotate[0] - GLOBE_CONFIG.rotateSpeed * k, rotate[1]]);
-        svg.selectAll("path").attr("d", (d: any) => pathGenerator(d as any));
+        updatePaths();
       }
     }, GLOBE_CONFIG.timerInterval);
   });
 
+  // Use different container styles based on size
+  const containerClass = () =>
+    size() === "responsive"
+      ? "flex flex-col text-white justify-center items-center"
+      : "w-full h-full flex items-center justify-center";
+
   return (
-    <div class="flex flex-col text-white justify-center items-center">
+    <div class={containerClass()}>
       <div ref={mapContainer}></div>
     </div>
   );
 };
 
-export default GlobeComponent;
+export default Globe;

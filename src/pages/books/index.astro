@@ -2,7 +2,7 @@
 export const prerender = true;
 
 import { getCollection } from "astro:content";
-import BasicLayout from "../../layouts/BasicLayout.astro";
+import ListPageLayout from "../../layouts/ListPageLayout.astro";
 import { formatDateJP } from "../../lib/helpers";
 
 const books = (await getCollection("books"))
@@ -15,47 +15,31 @@ const books = (await getCollection("books"))
 const stars = (rating: number) => "★".repeat(rating) + "☆".repeat(5 - rating);
 ---
 
-<BasicLayout title="Books - Ryo Nakayama" description="Books I've read">
-  <main class="text-white m-auto px-6 py-12 max-w-3xl min-h-screen">
-    <a href="/" class="text-sm text-gray-400 hover:text-white mb-4 inline-block">
-      ← Back to Home
-    </a>
+<ListPageLayout title="Books - Ryo Nakayama" description="Books I've read" heading="Books I Read">
+  <ul class="space-y-6">
+    {books.map((book) => (
+      <li class="border-b border-neutral-700 pb-6">
+        <a href={`/books/${book.id}`} class="group block">
+          <h2 class="text-xl font-medium group-hover:text-primary-400 transition-colors">
+            {book.data.title}
+          </h2>
+          <p class="text-gray-400 text-sm mt-1">{book.data.author}</p>
+          <div class="flex items-center gap-4 mt-2">
+            {book.data.rating && (
+              <span class="text-yellow-400 text-sm">{stars(book.data.rating)}</span>
+            )}
+            {book.data.finished && (
+              <time class="text-xs text-gray-500">
+                {formatDateJP(book.data.finished)}
+              </time>
+            )}
+          </div>
+        </a>
+      </li>
+    ))}
+  </ul>
 
-    <h1 class="text-3xl font-bold mt-6 mb-8">Books I Read</h1>
-
-    <ul class="space-y-6">
-      {books.map((book) => (
-        <li class="border-b border-neutral-700 pb-6">
-          <a href={`/books/${book.id}`} class="group block">
-            <h2 class="text-xl font-medium group-hover:text-primary-400 transition-colors">
-              {book.data.title}
-            </h2>
-            <p class="text-gray-400 text-sm mt-1">{book.data.author}</p>
-            <div class="flex items-center gap-4 mt-2">
-              {book.data.rating && (
-                <span class="text-yellow-400 text-sm">{stars(book.data.rating)}</span>
-              )}
-              {book.data.finished && (
-                <time class="text-xs text-gray-500">
-                  {formatDateJP(book.data.finished)}
-                </time>
-              )}
-            </div>
-          </a>
-        </li>
-      ))}
-    </ul>
-
-    {books.length === 0 && (
-      <p class="text-gray-500">No books yet.</p>
-    )}
-  </main>
-</BasicLayout>
-
-<style>
-  body {
-    justify-content: flex-start !important;
-    height: auto !important;
-    min-height: 100vh;
-  }
-</style>
+  {books.length === 0 && (
+    <p class="text-gray-500">No books yet.</p>
+  )}
+</ListPageLayout>
