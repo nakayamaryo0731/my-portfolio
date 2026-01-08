@@ -3,17 +3,10 @@ export const prerender = true;
 
 import { getCollection } from "astro:content";
 import BasicLayout from "../../layouts/BasicLayout.astro";
+import { formatDateJP } from "../../lib/helpers";
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
-
-const formatDate = (date: Date) => {
-  return date.toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
 
 // Get unique tags
 const allTags = [...new Set(posts.flatMap((post) => post.data.tags || []))];
@@ -53,7 +46,7 @@ const allTags = [...new Set(posts.flatMap((post) => post.data.tags || []))];
               <p class="text-gray-400 text-sm mt-1 line-clamp-2">{post.data.description}</p>
             )}
             <div class="flex items-center gap-3 mt-2">
-              <time class="text-xs text-gray-500">{formatDate(post.data.pubDate)}</time>
+              <time class="text-xs text-gray-500">{formatDateJP(post.data.pubDate)}</time>
               {post.data.tags && post.data.tags.length > 0 && (
                 <div class="flex gap-1">
                   {post.data.tags.map((tag) => (

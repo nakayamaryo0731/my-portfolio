@@ -19,15 +19,9 @@ export async function getStaticPaths() {
   });
 }
 
-const { posts, tag } = Astro.props;
+import { formatDateJP } from "../../../lib/helpers";
 
-const formatDate = (date: Date) => {
-  return date.toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
+const { posts, tag } = Astro.props;
 ---
 
 <BasicLayout title={`#${tag} - Blog`} description={`Posts tagged with #${tag}`}>
@@ -50,7 +44,7 @@ const formatDate = (date: Date) => {
             {post.data.description && (
               <p class="text-gray-400 text-sm mt-1 line-clamp-2">{post.data.description}</p>
             )}
-            <time class="text-xs text-gray-500 mt-2 block">{formatDate(post.data.pubDate)}</time>
+            <time class="text-xs text-gray-500 mt-2 block">{formatDateJP(post.data.pubDate)}</time>
           </a>
         </li>
       ))}

@@ -3,6 +3,7 @@ export const prerender = true;
 
 import { getCollection } from "astro:content";
 import BasicLayout from "../../layouts/BasicLayout.astro";
+import { formatDateJP } from "../../lib/helpers";
 
 const books = (await getCollection("books"))
   .sort((a, b) => {
@@ -12,14 +13,6 @@ const books = (await getCollection("books"))
   });
 
 const stars = (rating: number) => "★".repeat(rating) + "☆".repeat(5 - rating);
-
-const formatDate = (date: Date) => {
-  return date.toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
 ---
 
 <BasicLayout title="Books - Ryo Nakayama" description="Books I've read">
@@ -44,7 +37,7 @@ const formatDate = (date: Date) => {
               )}
               {book.data.finished && (
                 <time class="text-xs text-gray-500">
-                  {formatDate(book.data.finished)}
+                  {formatDateJP(book.data.finished)}
                 </time>
               )}
             </div>

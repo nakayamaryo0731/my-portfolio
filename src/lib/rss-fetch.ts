@@ -1,9 +1,5 @@
 // Native RSS fetcher for Cloudflare Workers compatibility
-export type FeedItem = {
-  title: string;
-  link: string;
-  pubDate: Date;
-};
+import type { FeedItem } from "./types";
 
 export async function fetchRSSFeed(url: string): Promise<FeedItem[]> {
   try {
