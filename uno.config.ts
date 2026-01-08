@@ -9,6 +9,8 @@ export default defineConfig({
     // posts.astro - archive toggle & tag filter
     'hidden', '-rotate-90', 'text-primary-400', 'text-gray-400',
     'bg-neutral-700', 'bg-neutral-600', 'text-gray-200',
+    // posts.astro - summary links (dynamically generated)
+    'text-blue-400', 'text-green-400',
   ],
   content: {
     filesystem: [

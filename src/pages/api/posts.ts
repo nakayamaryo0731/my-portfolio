@@ -7,10 +7,16 @@ import type { PostItem } from "../../lib/types";
 export const prerender = false;
 
 export const GET: APIRoute = async () => {
+  // Fetch all sources in parallel
+  const [blogPosts, zennItems, noteItems] = await Promise.all([
+    getCollection("blog", ({ data }) => !data.draft),
+    fetchRSSFeed(RSS_FEEDS.zenn),
+    fetchRSSFeed(RSS_FEEDS.note),
+  ]);
+
   const posts: PostItem[] = [];
 
   // Internal blog posts
-  const blogPosts = await getCollection("blog", ({ data }) => !data.draft);
   blogPosts.forEach((post) => {
     posts.push({
       title: post.data.title,
@@ -23,7 +29,6 @@ export const GET: APIRoute = async () => {
   });
 
   // Zenn
-  const zennItems = await fetchRSSFeed(RSS_FEEDS.zenn);
   zennItems.forEach((item) => {
     posts.push({
       title: item.title,
@@ -34,7 +39,6 @@ export const GET: APIRoute = async () => {
   });
 
   // note
-  const noteItems = await fetchRSSFeed(RSS_FEEDS.note);
   noteItems.forEach((item) => {
     posts.push({
       title: item.title,

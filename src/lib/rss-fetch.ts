@@ -3,7 +3,9 @@ import type { FeedItem } from "./types";
 
 export async function fetchRSSFeed(url: string): Promise<FeedItem[]> {
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(5000), // 5秒タイムアウト
+    });
     if (!response.ok) {
       return [];
     }
